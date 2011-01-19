@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
-import android.widget.Toast;
 
 public class SMSReciever extends BroadcastReceiver {
 
@@ -18,11 +17,12 @@ public class SMSReciever extends BroadcastReceiver {
 		for (int n = 0; n < messages.length; n++) {
 			smsMessage[n] = SmsMessage.createFromPdu((byte[]) messages[n]);
 		}
-
-		// show first message
-		Toast toast = Toast.makeText(context,
-		"Received SMS: " + smsMessage[0].getMessageBody(), Toast.LENGTH_LONG);
-		toast.show();
+		SmsMessage firstMessage = smsMessage[0];
+		Intent activityIntent = new Intent(DiscoServActivity.INTENT_SMS_RECIEVE);
+		activityIntent.putExtra("message", firstMessage.getDisplayMessageBody());
+		activityIntent.putExtra("address", firstMessage.getDisplayOriginatingAddress());
+		activityIntent.putExtra("timestampMillis", String.valueOf(firstMessage.getTimestampMillis()));
+		activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.sendBroadcast(activityIntent);
 	}
-
 }
