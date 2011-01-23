@@ -17,12 +17,17 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +37,11 @@ public class DiscoServActivity extends Activity {
 	
 	private static Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
 	private TextView txtViewGuthaben;
+	private Button btnRequestGuthaben;
 	private String betrag;
 	private RequestGuthabenThread threadRequestBeitrag;
+	private String benutzername;
+	private String passwort;
 	
     /** Called when the activity is first created. */
 	@Override
@@ -41,8 +49,24 @@ public class DiscoServActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
-    	
+        btnRequestGuthaben = (Button) findViewById(R.id.Button01);
     }
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		benutzername = prefs.getString(SettingsPreferencesActivity.KEY_USERNAME, "");
+		passwort = prefs.getString(SettingsPreferencesActivity.KEY_PASSWORD, "");
+		if(isBenutzernamePasswortEmpty()){
+			StringBuilder sb = new StringBuilder("Benutzername und Passwort müssen noch festgelegt werden");
+			Dialog d = Common.createAlertDialog(txtViewGuthaben.getContext(), sb.toString());
+			d.show();
+			btnRequestGuthaben.setEnabled(false);
+		}else{
+			btnRequestGuthaben.setEnabled(true);
+		}
+	}
 	
 	@Override
 	protected void onDestroy() {
@@ -65,7 +89,7 @@ public class DiscoServActivity extends Activity {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		 switch (item.getItemId()) {
 		    case R.id.menu_settings:
-		        //TODO: einstellungsdialog oeffnen
+		    	startActivity(new Intent(this, SettingsPreferencesActivity.class));
 		        return true;
 		    case R.id.menu_quit:
 		        quit();
@@ -81,6 +105,7 @@ public class DiscoServActivity extends Activity {
 	    
     public void btnRequestClickHandler(final View view) {
     	Log.d(LOG_TAG, "btnRequestClickHandler");
+    	if(threadRequestBeitrag!=null && threadRequestBeitrag.isAlive()) return;
     	//TODO:Pruefen ob internet verfuegbar
 //    	ConnectivityManager conManager = (ConnectivityManager) view.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 //    	conManager.requestRouteToHost(ConnectivityManager., hostAddress)
@@ -155,8 +180,8 @@ public class DiscoServActivity extends Activity {
 				showToast(view, "Verbinde bitte warten...");
 		    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		    	HttpPost httpost = new HttpPost("https://service.discoplus.de/frei/LOGIN");
-		    	nvps.add(new BasicNameValuePair("credential_0", "mobileNr"));
-		    	nvps.add(new BasicNameValuePair("credential_1", "passw"));
+		    	nvps.add(new BasicNameValuePair("credential_0", benutzername));
+		    	nvps.add(new BasicNameValuePair("credential_1", passwort));
 		    	nvps.add(new BasicNameValuePair("destination", "/discoplus/index3.php"));
 		    	httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 		    	HttpResponse response = httpclient.execute(httpost);
@@ -191,4 +216,7 @@ public class DiscoServActivity extends Activity {
     	}
     }
     
+    private boolean isBenutzernamePasswortEmpty(){
+    	return (Common.stringIsEmpty(benutzername) || Common.stringIsEmpty(passwort));
+    }
 }
