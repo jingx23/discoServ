@@ -2,7 +2,7 @@
 <resources>
     
     <string name="app_name">discoServ</string>
-<string name="btnRequestName">Abfragen</string>
+<string name="btnRequestName">Guthaben abfragen</string>
 <string name="btnRequestClickHandler">btnRequestClickHandler</string>
 <string name="menu_quit">Beenden</string>
 <string name="menu_settings">Einstellungen</string>

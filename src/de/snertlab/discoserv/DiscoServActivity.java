@@ -20,6 +20,9 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -34,6 +37,7 @@ import android.widget.Toast;
 public class DiscoServActivity extends Activity {
 	
 	public static final String LOG_TAG = "DiscoServ";
+	private static final String PACKAGE = "de.snertlab.discoserv";
 	
 	private static Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
 	private TextView txtViewGuthaben;
@@ -50,6 +54,8 @@ public class DiscoServActivity extends Activity {
         setContentView(R.layout.main);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
+        updateBetragText("0,00");
+        this.setTitle( this.getTitle() + "  v" + getVersionInfo());
     }
 	
 	@Override
@@ -109,8 +115,6 @@ public class DiscoServActivity extends Activity {
     	//TODO:Pruefen ob internet verfuegbar
 //    	ConnectivityManager conManager = (ConnectivityManager) view.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 //    	conManager.requestRouteToHost(ConnectivityManager., hostAddress)
-    	betrag = "";
-    	txtViewGuthaben.setText("");
     	threadRequestBeitrag = new RequestGuthabenThread(view);
     	threadRequestBeitrag.start();
     }
@@ -129,7 +133,7 @@ public class DiscoServActivity extends Activity {
     	Log.d(LOG_TAG, "updateBetragText");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
-		    	txtViewGuthaben.setText(betrag + "Û");
+		    	txtViewGuthaben.setText("Guthaben: " + betrag + "Û");
 		    }
 		});    	
     }
@@ -223,4 +227,17 @@ public class DiscoServActivity extends Activity {
     private boolean isBenutzernamePasswortEmpty(){
     	return (Common.stringIsEmpty(benutzername) || Common.stringIsEmpty(passwort));
     }
+    
+    private String getVersionInfo(){
+    	PackageInfo pInfo  = null;
+    	String versionName = null;
+    	try {
+    		pInfo = getPackageManager().getPackageInfo(PACKAGE, PackageManager.GET_META_DATA);
+    		versionName = pInfo.versionName;
+    	} catch (NameNotFoundException e) {
+    		Log.e(LOG_TAG, "", e);
+    	}
+    	return versionName;
+    }
+
 }
