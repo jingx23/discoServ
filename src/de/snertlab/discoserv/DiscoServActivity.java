@@ -192,6 +192,10 @@ public class DiscoServActivity extends Activity {
 		    		betrag 	= findGuthaben(html);
 	    			Log.d(LOG_TAG, "mHandler.post");
 	    			updateBetragText(betrag);
+		    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
+		    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");
+		    		Log.w(LOG_TAG, sb.toString());
+		    		showToast(view, sb.toString());		    		
 		    	}else{
 		    		StringBuilder sb = new StringBuilder("Fehler falscher HTTP Status: " + statusCode);
 		    		Log.w(LOG_TAG, sb.toString());
