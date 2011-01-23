@@ -11,4 +11,8 @@
 <string name="preferences_username_dialogTitle">Benutzername</string>
 <string name="preferences_password_title">Passwort</string>
 <string name="preferences_password_dialogTitle">Passwort</string>
+<string name="dialogWaitForInternetTitle">Netzwerk nicht verfügbar</string>
+<string name="dialogWaitForInternetMessage">Zurzeit ist kein Internetverbindung verfügbar.</string>
+<string name="dialogWaitForInternetBtnRetry">Erneut versuchen</string>
+<string name="dialogWaitForInternetBtnAbort">Abbrechen</string>
 </resources>

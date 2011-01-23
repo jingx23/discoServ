@@ -46,17 +46,23 @@ public class DiscoServActivity extends Activity {
 	private RequestGuthabenThread threadRequestBeitrag;
 	private String benutzername;
 	private String passwort;
+	private boolean inetConnectionSuccess;
 	
     /** Called when the activity is first created. */
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        init();
+    }
+	
+	private void init(){
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
         updateBetragText("0,00");
         this.setTitle( this.getTitle() + "  v" + getVersionInfo());
-    }
+        doCheckInternetConnection();
+	}
 	
 	@Override
 	protected void onResume() {
@@ -112,11 +118,11 @@ public class DiscoServActivity extends Activity {
     public void btnRequestClickHandler(final View view) {
     	Log.d(LOG_TAG, "btnRequestClickHandler");
     	if(threadRequestBeitrag!=null && threadRequestBeitrag.isAlive()) return;
-    	//TODO:Pruefen ob internet verfuegbar
-//    	ConnectivityManager conManager = (ConnectivityManager) view.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-//    	conManager.requestRouteToHost(ConnectivityManager., hostAddress)
-    	threadRequestBeitrag = new RequestGuthabenThread(view);
-    	threadRequestBeitrag.start();
+    	doCheckInternetConnection();
+	    if(inetConnectionSuccess){
+	    	threadRequestBeitrag = new RequestGuthabenThread(view);
+	    	threadRequestBeitrag.start();
+	    }
     }
     
     
@@ -179,7 +185,7 @@ public class DiscoServActivity extends Activity {
     	@Override
     	public void run() {
 			try{
-				httpclient = new DefaultHttpClient();
+				httpclient = new DefaultHttpClient();				
 				Log.d(LOG_TAG, "requestBetrag thread startet");
 				showToast(view, "Verbinde bitte warten...");
 		    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
@@ -211,7 +217,7 @@ public class DiscoServActivity extends Activity {
 					return; //ignore
 				}
 				Log.e(LOG_TAG, "", e);
-				showToast(view, "Fehler beim Aufbau der Verbindung");
+				showToast(view, "Fehler beim abrufen aufgetreten");
 			}
 			Log.d(LOG_TAG, "requestBetrag thread end");
 		}
@@ -238,6 +244,23 @@ public class DiscoServActivity extends Activity {
     		Log.e(LOG_TAG, "", e);
     	}
     	return versionName;
+    }
+    
+    private void doCheckInternetConnection(){
+    	WaitForInternetCallback waitForInternetCallback = new WaitForInternetCallback(this) {
+	    	public void onConnectionSuccess() {
+	    		inetConnectionSuccess = true;
+	    	 }
+	    	public void onConnectionFailure() {
+	    		inetConnectionSuccess = false;
+	    	}
+	    };
+	    try {
+	    	WaitForInternet.setCallback(waitForInternetCallback);
+	    } catch (SecurityException e) {
+	    	Log.w(LOG_TAG,"Netzwerk Status kann nicht geprüft werden", e);
+	    	waitForInternetCallback.onConnectionSuccess();
+	    }
     }
 
 }
