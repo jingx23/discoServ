@@ -19,6 +19,9 @@ import org.apache.http.protocol.HTTP;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,9 +31,9 @@ public class DiscoServActivity extends Activity {
 	public static final String LOG_TAG = "DiscoServ";
 	
 	private static Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
-	private DefaultHttpClient httpclient;
 	private TextView txtViewGuthaben;
 	private String betrag;
+	private RequestGuthabenThread threadRequestBeitrag;
 	
     /** Called when the activity is first created. */
 	@Override
@@ -38,8 +41,43 @@ public class DiscoServActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
-    	httpclient = new DefaultHttpClient();
+    	
     }
+	
+	@Override
+	protected void onDestroy() {
+		Log.d(LOG_TAG, "onDestroy");
+		if(threadRequestBeitrag!=null && threadRequestBeitrag.isAlive()){
+			Log.d(LOG_TAG, "Stoppe threadRequestBeitrag");
+			threadRequestBeitrag.stopMe();
+		}
+		super.onDestroy();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.menu, menu);
+	    return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		 switch (item.getItemId()) {
+		    case R.id.menu_settings:
+		        //TODO: einstellungsdialog oeffnen
+		        return true;
+		    case R.id.menu_quit:
+		        quit();
+		        return true;
+		    default:
+		        return super.onOptionsItemSelected(item);
+		    }
+	}
+	
+	private void quit(){
+		this.finish();
+	}
 	    
     public void btnRequestClickHandler(final View view) {
     	Log.d(LOG_TAG, "btnRequestClickHandler");
@@ -48,44 +86,10 @@ public class DiscoServActivity extends Activity {
 //    	conManager.requestRouteToHost(ConnectivityManager., hostAddress)
     	betrag = "";
     	txtViewGuthaben.setText("");
-    	requestBetrag(view);
+    	threadRequestBeitrag = new RequestGuthabenThread(view);
+    	threadRequestBeitrag.start();
     }
     
-    private void requestBetrag(final View view){
-    	Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try{
-					Log.d(LOG_TAG, "requestBetrag thread startet");
-					showToast(view, "Verbinde bitte warten...");
-			    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-			    	HttpPost httpost = new HttpPost("https://service.discoplus.de/frei/LOGIN");
-			    	nvps.add(new BasicNameValuePair("credential_0", "mobileNr"));
-			    	nvps.add(new BasicNameValuePair("credential_1", "passw"));
-			    	nvps.add(new BasicNameValuePair("destination", "/discoplus/index3.php"));
-			    	httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-			    	HttpResponse response = httpclient.execute(httpost);
-			    	int statusCode = response.getStatusLine().getStatusCode();
-			    	if(HttpStatus.SC_OK==statusCode){
-			    		showToast(view, "Status OK");
-			    		String html 	= makeHtmlFromResponse(response);
-			    		betrag 	= findGuthaben(html);
-		    			Log.d(LOG_TAG, "mHandler.post");
-		    			updateBetragText(betrag);
-			    	}else{
-			    		StringBuilder sb = new StringBuilder("Fehler falscher HTTP Status: " + statusCode);
-			    		Log.w(LOG_TAG, sb.toString());
-			    		showToast(view, sb.toString());
-			    	}
-				}catch (Exception e) {
-					Log.e(LOG_TAG, "", e);
-					showToast(view, "Fehler beim Aufbau der Verbindung");
-				}
-				Log.d(LOG_TAG, "requestBetrag thread end");
-			}
-		});
-    	thread.start();    	
-    }
     
     private void showToast(final View view, final String text){
     	Log.d(LOG_TAG, "showToast");
@@ -132,6 +136,59 @@ public class DiscoServActivity extends Activity {
     	}
     	Log.d(LOG_TAG, "findGuthaben end");
     	return betrag;
+    }
+    
+    private class RequestGuthabenThread extends Thread{
+    	private boolean stop;
+    	private View view;
+    	private DefaultHttpClient httpclient;
+    	
+    	public RequestGuthabenThread(View view){
+    		this.view = view;
+    	}
+    	
+    	@Override
+    	public void run() {
+			try{
+				httpclient = new DefaultHttpClient();
+				Log.d(LOG_TAG, "requestBetrag thread startet");
+				showToast(view, "Verbinde bitte warten...");
+		    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		    	HttpPost httpost = new HttpPost("https://service.discoplus.de/frei/LOGIN");
+		    	nvps.add(new BasicNameValuePair("credential_0", "mobileNr"));
+		    	nvps.add(new BasicNameValuePair("credential_1", "passw"));
+		    	nvps.add(new BasicNameValuePair("destination", "/discoplus/index3.php"));
+		    	httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+		    	HttpResponse response = httpclient.execute(httpost);
+		    	int statusCode = response.getStatusLine().getStatusCode();
+		    	if(HttpStatus.SC_OK==statusCode){
+		    		showToast(view, "Status OK");
+		    		String html 	= makeHtmlFromResponse(response);
+		    		betrag 	= findGuthaben(html);
+	    			Log.d(LOG_TAG, "mHandler.post");
+	    			updateBetragText(betrag);
+		    	}else{
+		    		StringBuilder sb = new StringBuilder("Fehler falscher HTTP Status: " + statusCode);
+		    		Log.w(LOG_TAG, sb.toString());
+		    		showToast(view, sb.toString());
+		    	}
+				httpclient.getConnectionManager().shutdown();
+			}catch (Exception e) {
+				if(stop && "Request aborted".equals(e.getMessage())){
+					return; //ignore
+				}
+				Log.e(LOG_TAG, "", e);
+				showToast(view, "Fehler beim Aufbau der Verbindung");
+			}
+			Log.d(LOG_TAG, "requestBetrag thread end");
+		}
+    	
+    	public void stopMe(){
+    		Log.d(LOG_TAG, "stopMe");
+			httpclient.getConnectionManager().shutdown();
+    		this.stop = true;
+    		this.interrupt();
+    	}
     }
     
 }
