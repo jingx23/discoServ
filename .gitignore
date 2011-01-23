@@ -6,3 +6,4 @@ build/**/*
 bin/**/*
 bin/
 deploy/
+discoServ.keystore

@@ -2,6 +2,6 @@
 <resources>
     
     <string name="app_name">discoServ</string>
-<string name="btnSendName">Senden</string>
-<string name="btnSendClickHandler">btnSendClickHandler</string>
+<string name="btnRequestName">Abfragen</string>
+<string name="btnRequestClickHandler">btnRequestClickHandler</string>
 </resources>
