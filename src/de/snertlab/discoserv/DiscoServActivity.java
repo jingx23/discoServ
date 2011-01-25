@@ -1,21 +1,5 @@
 package de.snertlab.discoserv;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -23,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -40,10 +25,8 @@ public class DiscoServActivity extends Activity {
 	private static final String PACKAGE = "de.snertlab.discoserv";
 	private static final String KEY_STATE_BETRAG = "betrag";
 	
-	private static Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
 	private TextView txtViewGuthaben;
 	private Button btnRequestGuthaben;
-	private String betrag;
 	private RequestGuthabenThread threadRequestBeitrag;
 	private String benutzername;
 	private String passwort;
@@ -60,7 +43,7 @@ public class DiscoServActivity extends Activity {
 	private void init(){
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
-        updateBetragText("0,00");
+        updateGuthabenText("0,00");
         this.setTitle( this.getTitle() + "  v" + getVersionInfo());
         doCheckInternetConnection();
 	}
@@ -84,9 +67,11 @@ public class DiscoServActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		Log.d(LOG_TAG, "onDestroy");
-		if(threadRequestBeitrag!=null && threadRequestBeitrag.isAlive()){
+		if(threadRequestBeitrag!=null && AsyncTask.Status.RUNNING.equals(threadRequestBeitrag.getStatus())){
 			Log.d(LOG_TAG, "Stoppe threadRequestBeitrag");
-			threadRequestBeitrag.stopMe();
+			threadRequestBeitrag.cancel(true);
+			threadRequestBeitrag = null;
+			System.gc();
 		}
 		super.onDestroy();
 	}
@@ -118,16 +103,16 @@ public class DiscoServActivity extends Activity {
 	    
     public void btnRequestClickHandler(final View view) {
     	Log.d(LOG_TAG, "btnRequestClickHandler");
-    	if(threadRequestBeitrag!=null && threadRequestBeitrag.isAlive()) return;
+    	if(threadRequestBeitrag!=null && AsyncTask.Status.RUNNING.equals(threadRequestBeitrag.getStatus())) return;
     	doCheckInternetConnection();
 	    if(inetConnectionSuccess){
-	    	threadRequestBeitrag = new RequestGuthabenThread(view);
-	    	threadRequestBeitrag.start();
+	    	threadRequestBeitrag = new RequestGuthabenThread(this, view, benutzername, passwort);
+	    	threadRequestBeitrag.execute();
 	    }
     }
     
     
-    private void showToast(final View view, final String text){
+    public void showToast(final View view, final String text){
     	Log.d(LOG_TAG, "showToast");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
@@ -136,99 +121,13 @@ public class DiscoServActivity extends Activity {
 		});
     }
     
-    private void updateBetragText(final String betrag){
+    public void updateGuthabenText(final String betrag){
     	Log.d(LOG_TAG, "updateBetragText");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
 		    	txtViewGuthaben.setText("Guthaben: " + betrag + "Û");
 		    }
 		});    	
-    }
-
-    private String makeHtmlFromResponse(HttpResponse response){
-    	Log.d(LOG_TAG, "makeHtmlFromResponse start");
-    	try{
-	    	StringBuilder sb = new StringBuilder();
-	    	BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-	    	String readLine;
-	    	while(((readLine = br.readLine()) != null)) {
-	    		sb.append(readLine);
-	    	}
-	    	br.close();
-	    	Log.d(LOG_TAG, "makeHtmlFromResponse end");
-	    	return sb.toString();
-    	}catch (Exception e) {
-    		Log.e(LOG_TAG, "",e);
-    		throw new RuntimeException(e);
-		}
-    }
-    
-    private String findGuthaben(String html){
-    	Log.d(LOG_TAG, "findGuthaben start");
-    	String betrag = null;
-    	Matcher m = PATTERN_GUTHABEN.matcher(html);
-    	if(m.find()){
-    		betrag = m.group(1);
-    	}
-    	Log.d(LOG_TAG, "findGuthaben end");
-    	return betrag;
-    }
-    
-    private class RequestGuthabenThread extends Thread{
-    	private boolean stop;
-    	private View view;
-    	private DefaultHttpClient httpclient;
-    	
-    	public RequestGuthabenThread(View view){
-    		this.view = view;
-    	}
-    	
-    	@Override
-    	public void run() {
-			try{
-				httpclient = new DefaultHttpClient();				
-				Log.d(LOG_TAG, "requestBetrag thread startet");
-				showToast(view, "Verbinde bitte warten...");
-		    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		    	HttpPost httpost = new HttpPost("https://service.discoplus.de/frei/LOGIN");
-		    	nvps.add(new BasicNameValuePair("credential_0", benutzername));
-		    	nvps.add(new BasicNameValuePair("credential_1", passwort));
-		    	nvps.add(new BasicNameValuePair("destination", "/discoplus/index3.php"));
-		    	httpost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-		    	HttpResponse response = httpclient.execute(httpost);
-		    	int statusCode = response.getStatusLine().getStatusCode();
-		    	if(HttpStatus.SC_OK==statusCode){
-		    		showToast(view, "Status OK");
-		    		String html 	= makeHtmlFromResponse(response);
-		    		betrag 	= findGuthaben(html);
-	    			Log.d(LOG_TAG, "mHandler.post");
-	    			updateBetragText(betrag);
-		    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
-		    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");
-		    		Log.w(LOG_TAG, sb.toString());
-		    		showToast(view, sb.toString());		    		
-		    	}else{
-		    		StringBuilder sb = new StringBuilder("Fehler falscher HTTP Status: " + statusCode);
-		    		Log.w(LOG_TAG, sb.toString());
-		    		showToast(view, sb.toString());
-		    	}
-				httpclient.getConnectionManager().shutdown();
-			}catch (Exception e) {
-				if(stop && "Request aborted".equals(e.getMessage())){
-					return; //ignore
-				}
-				Log.e(LOG_TAG, "", e);
-				showToast(view, "Fehler beim abrufen aufgetreten");
-			}
-			Log.d(LOG_TAG, "requestBetrag thread end");
-		}
-    	
-    	public void stopMe(){
-    		Log.d(LOG_TAG, "stopMe");
-			httpclient.getConnectionManager().shutdown();
-    		this.stop = true;
-    		this.interrupt();
-    	}
     }
     
     private boolean isBenutzernamePasswortEmpty(){
@@ -266,15 +165,15 @@ public class DiscoServActivity extends Activity {
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-    	outState.putString(KEY_STATE_BETRAG, betrag);
+    	outState.putString(KEY_STATE_BETRAG, txtViewGuthaben.getText().toString());
     	super.onSaveInstanceState(outState);
     }
     
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
     	super.onRestoreInstanceState(savedInstanceState);
-    	betrag = savedInstanceState.getString(KEY_STATE_BETRAG);
-    	updateBetragText(betrag);
+    	String guthaben = savedInstanceState.getString(KEY_STATE_BETRAG);
+    	updateGuthabenText(guthaben);
     }
 
 }
