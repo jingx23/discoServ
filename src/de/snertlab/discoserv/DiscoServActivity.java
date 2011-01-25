@@ -38,6 +38,7 @@ public class DiscoServActivity extends Activity {
 	
 	public static final String LOG_TAG = "DiscoServ";
 	private static final String PACKAGE = "de.snertlab.discoserv";
+	private static final String KEY_STATE_BETRAG = "betrag";
 	
 	private static Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
 	private TextView txtViewGuthaben;
@@ -261,6 +262,19 @@ public class DiscoServActivity extends Activity {
 	    	Log.w(LOG_TAG,"Netzwerk Status kann nicht geprüft werden", e);
 	    	waitForInternetCallback.onConnectionSuccess();
 	    }
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	outState.putString(KEY_STATE_BETRAG, betrag);
+    	super.onSaveInstanceState(outState);
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    	super.onRestoreInstanceState(savedInstanceState);
+    	betrag = savedInstanceState.getString(KEY_STATE_BETRAG);
+    	updateBetragText(betrag);
     }
 
 }
