@@ -7,4 +7,4 @@ bin/**/*
 bin/
 deploy/
 proguard/
-discoServ.keystore
+discoServ_market.keystore
