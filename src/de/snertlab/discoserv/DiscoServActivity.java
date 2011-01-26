@@ -32,7 +32,6 @@ public class DiscoServActivity extends Activity {
 	private String passwort;
 	private boolean inetConnectionSuccess;
 	
-	//FIXME: Problem wenn gerade Daten abgerufen werden und dann Screen orientation auftritt => Fehler
 	
     /** Called when the activity is first created. */
 	@Override
