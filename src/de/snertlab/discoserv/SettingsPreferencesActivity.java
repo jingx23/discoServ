@@ -15,11 +15,14 @@
 	 
 package de.snertlab.discoserv;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 
 
 public class SettingsPreferencesActivity extends PreferenceActivity {
@@ -57,7 +60,12 @@ public class SettingsPreferencesActivity extends PreferenceActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mUsernamePreference.setSummary(getPreferenceScreen().getSharedPreferences().getString(KEY_USERNAME, ""));
+		String username = getPreferenceScreen().getSharedPreferences().getString(KEY_USERNAME, "");
+		if("".equals(username)){
+			username = getTelephonNr();
+			mUsernamePreference.setText(username);
+		}
+		mUsernamePreference.setSummary(username);
 		String stars = makeStarsForPassword(getPreferenceScreen().getSharedPreferences().getString(KEY_PASSWORD, ""));
 		mPasswordPreference.setSummary(stars);
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListenerAddSummeryText);
@@ -76,6 +84,16 @@ public class SettingsPreferencesActivity extends PreferenceActivity {
 			sb.append(star);
 		}
 		return sb.toString();
+	}
+	
+	private String getTelephonNr(){
+		TelephonyManager telephonyMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		String userId = telephonyMgr.getLine1Number();
+		if(userId == null || userId.trim().equals("")){
+			userId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+		}
+		if(userId==null) return "";
+		return userId;
 	}
 }
 
