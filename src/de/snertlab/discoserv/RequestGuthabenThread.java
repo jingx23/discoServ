@@ -14,6 +14,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
 import android.app.ProgressDialog;
@@ -23,6 +26,9 @@ import android.view.View;
 import de.snertlab.discoserv.model.IGuthaben;
 
 public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
+	
+	private static final int CON_TIMEOUT 	= (60 * 1000);
+	private static final int SOCKET_TIMEOUT = (60 * 1000);
 	
 	private static final Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
 	
@@ -46,7 +52,10 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	@Override
 	protected Void doInBackground(Void... params) {
 		try{
-			httpclient = new DefaultHttpClient();				
+			HttpParams httpParams = new BasicHttpParams();
+			HttpConnectionParams.setConnectionTimeout(httpParams, CON_TIMEOUT);
+			HttpConnectionParams.setSoTimeout(httpParams, SOCKET_TIMEOUT);
+			httpclient = new DefaultHttpClient(httpParams);
 			Log.d(DiscoServActivity.LOG_TAG, "requestBetrag thread startet");
 	    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 	    	HttpPost httpost = new HttpPost("https://service.discoplus.de/frei/LOGIN");
@@ -78,7 +87,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 				//ignore
 			}else{
 				Log.e(DiscoServActivity.LOG_TAG, "", e);
-				activity.showToast(view, "Fehler beim abrufen aufgetreten");
+				activity.showToast(view, "Fehler beim abrufen aufgetreten: " + e.getMessage());
 			}
 		}
 		Log.d(DiscoServActivity.LOG_TAG, "requestBetrag thread end");
