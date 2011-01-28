@@ -62,7 +62,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
 	    		double b = Common.formatBetragToDouble(betrag);
 	    		IGuthaben guthaben = myDB.insertNewGuthaben(b);
-    			activity.updateGuthabenText(guthaben.getGuthaben());
+    			activity.updateGuthabenLabels(guthaben);
 	    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
 	    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");
 	    		activity.showToast(view, sb.toString());

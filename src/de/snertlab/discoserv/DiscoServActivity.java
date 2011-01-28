@@ -21,13 +21,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.snertlab.discoserv.model.Guthaben;
 import de.snertlab.discoserv.model.IGuthaben;
 
 public class DiscoServActivity extends Activity {
 	
 	public static final String LOG_TAG = "DiscoServ";
 	private static final String PACKAGE = "de.snertlab.discoserv";
-	private static final String KEY_STATE_BETRAG = "betrag";
 	
 	private TextView txtViewGuthaben;
 	private Button btnRequestGuthaben;
@@ -52,9 +52,9 @@ public class DiscoServActivity extends Activity {
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
 		IGuthaben guthaben = myDB.getLastGuthabenFromDb();
 		if(guthaben==null){
-			updateGuthabenText(0);	
+			updateGuthabenLabels(new Guthaben(0, null));	
 		}else{
-			updateGuthabenText(guthaben.getGuthaben());	
+			updateGuthabenLabels(guthaben);	
 		}
         this.setTitle( this.getTitle() + "  v" + getVersionInfo());
         doCheckInternetConnection();
@@ -133,11 +133,11 @@ public class DiscoServActivity extends Activity {
 		});
     }
     
-    public void updateGuthabenText(final double betrag){
-    	Log.d(LOG_TAG, "updateBetragText");
+    public void updateGuthabenLabels(final IGuthaben guthaben){
+    	Log.d(LOG_TAG, "updateGuthabenLabels");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
-		    	String betragFormat = Common.formatBetragToDisplay(betrag);
+		    	String betragFormat = Common.formatBetragToDisplay(guthaben.getGuthaben());
 		    	txtViewGuthaben.setText("Guthaben: " + betragFormat);
 		    }
 		});    	
@@ -174,19 +174,6 @@ public class DiscoServActivity extends Activity {
 	    	Log.w(LOG_TAG,"Netzwerk Status kann nicht geprüft werden", e);
 	    	waitForInternetCallback.onConnectionSuccess();
 	    }
-    }
-    
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-    	outState.putString(KEY_STATE_BETRAG, txtViewGuthaben.getText().toString());
-    	super.onSaveInstanceState(outState);
-    }
-    
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    	super.onRestoreInstanceState(savedInstanceState);
-    	String guthaben = savedInstanceState.getString(KEY_STATE_BETRAG);
-    	txtViewGuthaben.setTag(guthaben);
     }
 
 }
