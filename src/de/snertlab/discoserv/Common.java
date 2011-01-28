@@ -59,7 +59,7 @@ public class Common {
     
     public static String formatBetragToDisplay(double betrag){
     	String s = DECIMAL_FORMAT.format(betrag);
-    	return s + " Û";
+    	return s + " \u20AC";
     }
 
 }

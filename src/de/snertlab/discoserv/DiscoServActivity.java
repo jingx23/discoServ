@@ -69,7 +69,7 @@ public class DiscoServActivity extends Activity {
 		benutzername = prefs.getString(SettingsPreferencesActivity.KEY_USERNAME, "");
 		passwort = prefs.getString(SettingsPreferencesActivity.KEY_PASSWORD, "");
 		if(isBenutzernamePasswortEmpty()){
-			StringBuilder sb = new StringBuilder("Benutzername und Passwort müssen noch festgelegt werden");
+			StringBuilder sb = new StringBuilder("Benutzername und Passwort m\u00fcssen noch festgelegt werden");
 			Dialog d = Common.createAlertDialog(txtViewGuthaben.getContext(), sb.toString());
 			d.show();
 			btnRequestGuthaben.setEnabled(false);
@@ -173,7 +173,7 @@ public class DiscoServActivity extends Activity {
 	    try {
 	    	WaitForInternet.setCallback(waitForInternetCallback);
 	    } catch (SecurityException e) {
-	    	Log.w(LOG_TAG,"Netzwerk Status kann nicht geprüft werden", e);
+	    	Log.w(LOG_TAG,"Netzwerk Status kann nicht gepr\u00FCft werden", e);
 	    	waitForInternetCallback.onConnectionSuccess();
 	    }
     }
