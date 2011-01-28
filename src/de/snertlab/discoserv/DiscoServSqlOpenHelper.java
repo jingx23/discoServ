@@ -33,8 +33,23 @@ public class DiscoServSqlOpenHelper extends SQLiteOpenHelper {
 	}
 
 	public IGuthaben insertNewGuthaben(double dGuthaben) {
+		//TODO: Vorerst nicht mehrere Eintraege erzeugen ist noch nicht sicher ob dafuer verwendung besteht
 		IGuthaben guthaben = new Guthaben(dGuthaben, new Date());
-		getWritableDatabase().execSQL("INSERT INTO guthaben (datum, betrag) VALUES(datetime('" + ISO8601FORMAT.format(guthaben.getDatum()) + "')," + guthaben.getGuthaben() + ");");
+		boolean entriesFound = false;
+		int firstId = 0;
+		Cursor c = getReadableDatabase().rawQuery("SELECT * FROM guthaben where id=1", null);
+		c.moveToFirst();
+		if(c.isFirst()){
+			entriesFound = true;
+			firstId = c.getInt(c.getColumnIndex("id"));
+		}
+		c.close();
+		if(entriesFound){
+			getWritableDatabase().execSQL("UPDATE guthaben SET datum=datetime('" + ISO8601FORMAT.format(guthaben.getDatum()) + "'), betrag="+ guthaben.getGuthaben() +" WHERE id="+firstId+";");			
+		}else{
+			getWritableDatabase().execSQL("INSERT INTO guthaben (datum, betrag) VALUES(datetime('" + ISO8601FORMAT.format(guthaben.getDatum()) + "')," + guthaben.getGuthaben() + ");");	
+		}
+		
 		return guthaben;
 	}
 
