@@ -5,7 +5,9 @@
     android:layout_height="fill_parent"
     >
 
-<TextView android:layout_width="fill_parent" android:id="@+id/txtViewGuthaben" android:layout_height="wrap_content" android:minHeight="50px" android:gravity="center_vertical"></TextView><Button android:id="@+id/Button01" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="@string/btnRequestName" android:onClick="@string/btnRequestClickHandler"></Button>
+<TextView android:layout_width="fill_parent" android:id="@+id/txtViewGuthaben" android:layout_height="wrap_content" android:minHeight="50px" android:gravity="center_vertical"></TextView>
+<Button android:id="@+id/Button01" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="@string/btnRequestName" android:onClick="@string/btnRequestClickHandler"></Button>
+<TextView android:text="TextView" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/txtViewLetzteAktualisierung"></TextView>
 
 
 </LinearLayout>

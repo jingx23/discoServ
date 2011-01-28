@@ -30,6 +30,7 @@ public class DiscoServActivity extends Activity {
 	private static final String PACKAGE = "de.snertlab.discoserv";
 	
 	private TextView txtViewGuthaben;
+	private TextView txtViewLetzteAktualisierung;
 	private Button btnRequestGuthaben;
 	private RequestGuthabenThread threadRequestBeitrag;
 	private String benutzername;
@@ -49,10 +50,11 @@ public class DiscoServActivity extends Activity {
 	private void init(){
 		myDB = new DiscoServSqlOpenHelper(this);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
+        txtViewLetzteAktualisierung = (TextView) findViewById(R.id.txtViewLetzteAktualisierung);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
 		IGuthaben guthaben = myDB.getLastGuthabenFromDb();
 		if(guthaben==null){
-			updateGuthabenLabels(new Guthaben(0, null));	
+			updateGuthabenLabels(new Guthaben(0));	
 		}else{
 			updateGuthabenLabels(guthaben);	
 		}
@@ -137,8 +139,8 @@ public class DiscoServActivity extends Activity {
     	Log.d(LOG_TAG, "updateGuthabenLabels");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
-		    	String betragFormat = Common.formatBetragToDisplay(guthaben.getGuthaben());
-		    	txtViewGuthaben.setText("Guthaben: " + betragFormat);
+		    	txtViewGuthaben.setText("Guthaben: " + guthaben.getGuthabenDisplay());
+		    	txtViewLetzteAktualisierung.setText("Letzte Aktualisierung: " + guthaben.getDatumDisplay());
 		    }
 		});    	
     }

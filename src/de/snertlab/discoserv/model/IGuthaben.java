@@ -6,5 +6,7 @@ public interface IGuthaben {
 
 	double getGuthaben();
 	Date getDatum();
+	String getDatumDisplay();
+	String getGuthabenDisplay();
 
 }
