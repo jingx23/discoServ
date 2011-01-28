@@ -27,6 +27,7 @@ import android.telephony.TelephonyManager;
 
 public class SettingsPreferencesActivity extends PreferenceActivity {
 	
+	private static final String PASSWD_STARS = "****";
 	public static String KEY_USERNAME = "username";
 	public static String KEY_PASSWORD = "password";
 	
@@ -50,8 +51,11 @@ public class SettingsPreferencesActivity extends PreferenceActivity {
 				 if (KEY_USERNAME.equals(key)) {
 					 mUsernamePreference.setSummary(getPreferenceScreen().getSharedPreferences().getString(KEY_USERNAME, ""));
 				 }else if(KEY_PASSWORD.equals(key)){
-					 String stars = makeStarsForPassword(getPreferenceScreen().getSharedPreferences().getString(KEY_PASSWORD, ""));
-					 mPasswordPreference.setSummary(stars);
+					 String passwort = getPreferenceScreen().getSharedPreferences().getString(KEY_PASSWORD, "");
+					 if(! "".equals(passwort)){
+						 passwort = PASSWD_STARS;	
+					 }
+					 mPasswordPreference.setSummary(passwort);
 				 }
 			}
 		};
@@ -61,13 +65,16 @@ public class SettingsPreferencesActivity extends PreferenceActivity {
 	protected void onResume() {
 		super.onResume();
 		String username = getPreferenceScreen().getSharedPreferences().getString(KEY_USERNAME, "");
+		String passwort = getPreferenceScreen().getSharedPreferences().getString(KEY_PASSWORD, ""); 
 		if("".equals(username)){
 			username = getTelephonNr();
 			mUsernamePreference.setText(username);
 		}
 		mUsernamePreference.setSummary(username);
-		String stars = makeStarsForPassword(getPreferenceScreen().getSharedPreferences().getString(KEY_PASSWORD, ""));
-		mPasswordPreference.setSummary(stars);
+		if(! "".equals(passwort)){
+			passwort = PASSWD_STARS;
+		}
+		mPasswordPreference.setSummary(passwort);	
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListenerAddSummeryText);
 	}
 	
@@ -75,15 +82,6 @@ public class SettingsPreferencesActivity extends PreferenceActivity {
 	protected void onPause() {
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListenerAddSummeryText);
 		super.onPause();
-	}
-	
-	private String makeStarsForPassword(String password){
-		String star = "*";
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < password.length(); i++) {
-			sb.append(star);
-		}
-		return sb.toString();
 	}
 	
 	private String getTelephonNr(){
