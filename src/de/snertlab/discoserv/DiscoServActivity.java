@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.snertlab.discoserv.model.IGuthaben;
 
 public class DiscoServActivity extends Activity {
 	
@@ -49,8 +50,12 @@ public class DiscoServActivity extends Activity {
 		myDB = new DiscoServSqlOpenHelper(this);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
-		double betrag = myDB.getLastBetragFromDb();
-		updateGuthabenText(betrag);
+		IGuthaben guthaben = myDB.getLastGuthabenFromDb();
+		if(guthaben==null){
+			updateGuthabenText(0);	
+		}else{
+			updateGuthabenText(guthaben.getGuthaben());	
+		}
         this.setTitle( this.getTitle() + "  v" + getVersionInfo());
         doCheckInternetConnection();
 	}

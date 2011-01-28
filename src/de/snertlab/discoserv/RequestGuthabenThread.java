@@ -20,6 +20,7 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+import de.snertlab.discoserv.model.IGuthaben;
 
 public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	
@@ -60,8 +61,8 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	    		String betrag 	= findGuthaben(html);
 	    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
 	    		double b = Common.formatBetragToDouble(betrag);
-	    		myDB.insertNewBetrag(b);
-    			activity.updateGuthabenText(b);
+	    		IGuthaben guthaben = myDB.insertNewGuthaben(b);
+    			activity.updateGuthabenText(guthaben.getGuthaben());
 	    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
 	    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");
 	    		activity.showToast(view, sb.toString());
