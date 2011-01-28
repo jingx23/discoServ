@@ -1,5 +1,8 @@
 package de.snertlab.discoserv;
 
+
+
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -31,6 +34,7 @@ public class DiscoServActivity extends Activity {
 	private String benutzername;
 	private String passwort;
 	private boolean inetConnectionSuccess;
+	private DiscoServSqlOpenHelper myDB; 
 	
 	
     /** Called when the activity is first created. */
@@ -42,9 +46,11 @@ public class DiscoServActivity extends Activity {
     }
 	
 	private void init(){
+		myDB = new DiscoServSqlOpenHelper(this);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
-        updateGuthabenText("0,00");
+		double betrag = myDB.getLastBetragFromDb();
+		updateGuthabenText(betrag);
         this.setTitle( this.getTitle() + "  v" + getVersionInfo());
         doCheckInternetConnection();
 	}
@@ -107,7 +113,7 @@ public class DiscoServActivity extends Activity {
     	if(threadRequestBeitrag!=null && AsyncTask.Status.RUNNING.equals(threadRequestBeitrag.getStatus())) return;
     	doCheckInternetConnection();
 	    if(inetConnectionSuccess){
-	    	threadRequestBeitrag = new RequestGuthabenThread(this, view, benutzername, passwort);
+	    	threadRequestBeitrag = new RequestGuthabenThread(this, myDB, view, benutzername, passwort);
 	    	threadRequestBeitrag.execute();
 	    }
     }
@@ -122,11 +128,12 @@ public class DiscoServActivity extends Activity {
 		});
     }
     
-    public void updateGuthabenText(final String betrag){
+    public void updateGuthabenText(final double betrag){
     	Log.d(LOG_TAG, "updateBetragText");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
-		    	txtViewGuthaben.setText("Guthaben: " + betrag + "Û");
+		    	String betragFormat = Common.formatBetragToDisplay(betrag);
+		    	txtViewGuthaben.setText("Guthaben: " + betragFormat);
 		    }
 		});    	
     }
@@ -174,7 +181,7 @@ public class DiscoServActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
     	super.onRestoreInstanceState(savedInstanceState);
     	String guthaben = savedInstanceState.getString(KEY_STATE_BETRAG);
-    	updateGuthabenText(guthaben);
+    	txtViewGuthaben.setTag(guthaben);
     }
 
 }

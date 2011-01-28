@@ -27,14 +27,16 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	
 	private boolean stop;
 	private DiscoServActivity activity;
+	private DiscoServSqlOpenHelper myDB;
 	private View view;
 	private DefaultHttpClient httpclient;
 	private String benutzername;
 	private String passwort;
 	private ProgressDialog dialog;
 	
-	public RequestGuthabenThread(DiscoServActivity activity, View view, String benutzername, String passwort){
+	public RequestGuthabenThread(DiscoServActivity activity, DiscoServSqlOpenHelper myDB, View view, String benutzername, String passwort){
 		this.view 	  = view;
+		this.myDB	  = myDB;
 		this.activity = activity;
 		this.benutzername = benutzername;
 		this.passwort = passwort;
@@ -56,10 +58,13 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	    	if(HttpStatus.SC_OK==statusCode){
 	    		String html 	= makeHtmlFromResponse(response);
 	    		String betrag 	= findGuthaben(html);
-    			Log.d(DiscoServActivity.LOG_TAG, "mHandler.post");
-    			activity.updateGuthabenText(betrag);
+	    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
+	    		double b = Common.formatBetragToDouble(betrag);
+	    		myDB.insertNewBetrag(b);
+    			activity.updateGuthabenText(b);
 	    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
 	    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");
+	    		activity.showToast(view, sb.toString());
 	    		Log.w(DiscoServActivity.LOG_TAG, sb.toString());
 	    	}else{
 	    		StringBuilder sb = new StringBuilder("Fehler falscher HTTP Status: " + statusCode);
