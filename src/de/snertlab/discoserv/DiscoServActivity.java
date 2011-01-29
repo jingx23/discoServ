@@ -113,6 +113,7 @@ public class DiscoServActivity extends Activity {
 	
 	private void quit(){
 		this.finish();
+		System.exit(0);
 	}
 	    
     public void btnRequestClickHandler(final View view) {
