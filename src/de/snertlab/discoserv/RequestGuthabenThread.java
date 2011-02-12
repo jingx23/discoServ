@@ -11,6 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -24,13 +25,16 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import de.snertlab.discoserv.model.IGuthaben;
+import de.snertlab.discoserv.model.IPosition;
+import de.snertlab.discoserv.model.Position;
 
 public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	
 	private static final int CON_TIMEOUT 	= (60 * 1000);
 	private static final int SOCKET_TIMEOUT = (60 * 1000);
 	
-	private static final Pattern PATTERN_GUTHABEN = Pattern.compile("Guthaben:{1}.*<b>(.*) EUR{1} </b>{1}");
+	private static final Pattern PATTERN_GUTHABEN   = Pattern.compile("prepaid Guthaben.+?<font[^>]+>(.+?)EUR");
+	private static final Pattern PATTERN_POSITIONEN = Pattern.compile("(?i)<a href=\"#\"[^>]+>(.+?)</a></td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>");
 	
 	private boolean stop;
 	private DiscoServActivity activity;
@@ -66,12 +70,22 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	    	HttpResponse response = httpclient.execute(httpost);
 	    	int statusCode = response.getStatusLine().getStatusCode();
 	    	if(HttpStatus.SC_OK==statusCode){
-	    		String html 	= makeHtmlFromResponse(response);
-	    		String betrag 	= findGuthaben(html);
-	    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
-	    		double b = Common.formatBetragToDouble(betrag);
-	    		IGuthaben guthaben = myDB.insertNewGuthaben(b);
-    			activity.updateGuthabenLabels(guthaben);
+	    		HttpGet httpGet = new HttpGet("https://service.discoplus.de/discoplus/prepaid.php?action=rechansicht");
+	    		response = httpclient.execute(httpGet);
+	    		statusCode = response.getStatusLine().getStatusCode();
+	    		if(HttpStatus.SC_OK!=statusCode){ //TODO: sauberer
+		    		StringBuilder sb = new StringBuilder("Fehler falscher HTTP Status: " + statusCode);
+		    		Log.w(DiscoServActivity.LOG_TAG, sb.toString());
+		    		activity.showToast(view, sb.toString());
+	    		}else{
+		    		String html 	= makeHtmlFromResponse(response);
+		    		String betrag 	= findGuthaben(html);
+		    		List<IPosition> listPositionen = parsePositionen(html);
+		    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
+		    		double b = Common.formatBetragToDouble(betrag);
+		    		IGuthaben guthaben = myDB.insertNewGuthaben(b);
+	    			activity.updateGuthabenLabels(listPositionen, guthaben);
+	    		}
 	    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
 	    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");
 	    		activity.showToast(view, sb.toString());
@@ -124,9 +138,26 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
     	Matcher m = PATTERN_GUTHABEN.matcher(html);
     	if(m.find()){
     		betrag = m.group(1);
+    		betrag = betrag.trim();
     	}
     	Log.d(DiscoServActivity.LOG_TAG, "findGuthaben end");
     	return betrag;
+    }
+    
+    private List<IPosition> parsePositionen(String html){
+    	Log.d(DiscoServActivity.LOG_TAG, "parsePositionen start");
+    	List<IPosition> listPositionen = new ArrayList<IPosition>();
+    	Matcher m = PATTERN_POSITIONEN.matcher(html);
+    	while(m.find()){
+    		Position pos = new Position();
+    		pos.setPositionBez(m.group(1).trim());
+    		pos.setNetto(m.group(3).trim());
+    		pos.setUSt(m.group(5).trim());
+    		pos.setBrutto(m.group(7).trim());
+    		listPositionen.add(pos);
+    	}
+    	Log.d(DiscoServActivity.LOG_TAG, "parsePositionen end");
+    	return listPositionen;
     }
     
     @Override
@@ -144,4 +175,5 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
     	stopMe();
     	super.onCancelled();
     }
+
 }

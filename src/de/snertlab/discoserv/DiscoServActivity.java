@@ -3,6 +3,9 @@ package de.snertlab.discoserv;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -19,10 +22,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.snertlab.discoserv.model.Guthaben;
 import de.snertlab.discoserv.model.IGuthaben;
+import de.snertlab.discoserv.model.IPosition;
 
 public class DiscoServActivity extends Activity {
 	
@@ -31,6 +36,7 @@ public class DiscoServActivity extends Activity {
 	
 	private TextView txtViewGuthaben;
 	private TextView txtViewLetzteAktualisierung;
+	private ListView listViewPositionen;
 	private Button btnRequestGuthaben;
 	private RequestGuthabenThread threadRequestBeitrag;
 	private String benutzername;
@@ -52,6 +58,8 @@ public class DiscoServActivity extends Activity {
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         txtViewLetzteAktualisierung = (TextView) findViewById(R.id.txtViewLetzteAktualisierung);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
+        listViewPositionen = (ListView) findViewById(R.id.listView1);
+        listViewPositionen.setClickable(false);
 		IGuthaben guthaben = myDB.getLastGuthabenFromDb();
 		if(guthaben==null){
 			updateGuthabenLabels(new Guthaben(0));	
@@ -135,13 +143,16 @@ public class DiscoServActivity extends Activity {
 		    }
 		});
     }
-    
     public void updateGuthabenLabels(final IGuthaben guthaben){
+    	updateGuthabenLabels(new ArrayList<IPosition>(), guthaben);
+    }
+    public void updateGuthabenLabels(final List<IPosition> listPositionen, final IGuthaben guthaben){
     	Log.d(LOG_TAG, "updateGuthabenLabels");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
 		    	txtViewGuthaben.setText("Guthaben: " + guthaben.getGuthabenDisplay());
 		    	txtViewLetzteAktualisierung.setText("Letzte Aktualisierung: " + guthaben.getDatumDisplay());
+		    	listViewPositionen.setAdapter(new DiscotelPositionArrayAdapter(listViewPositionen.getContext(), R.layout.rowlayout, listPositionen));
 		    }
 		});    	
     }
