@@ -3,6 +3,7 @@ package de.snertlab.discoserv;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +25,7 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
-import de.snertlab.discoserv.model.IGuthaben;
+import de.snertlab.discoserv.model.Guthaben;
 import de.snertlab.discoserv.model.IPosition;
 import de.snertlab.discoserv.model.Position;
 
@@ -38,14 +39,14 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	
 	private boolean stop;
 	private DiscoServActivity activity;
-	private DiscoServSqlOpenHelper myDB;
+	private DiscoServDataHelper myDB;
 	private View view;
 	private DefaultHttpClient httpclient;
 	private String benutzername;
 	private String passwort;
 	private ProgressDialog dialog;
 	
-	public RequestGuthabenThread(DiscoServActivity activity, DiscoServSqlOpenHelper myDB, View view, String benutzername, String passwort){
+	public RequestGuthabenThread(DiscoServActivity activity, DiscoServDataHelper myDB, View view, String benutzername, String passwort){
 		this.view 	  = view;
 		this.myDB	  = myDB;
 		this.activity = activity;
@@ -82,9 +83,10 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 		    		String betrag 	= findGuthaben(html);
 		    		List<IPosition> listPositionen = parsePositionen(html);
 		    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
-		    		double b = Common.formatBetragToDouble(betrag);
-		    		IGuthaben guthaben = myDB.insertNewGuthaben(b);
-	    			activity.updateGuthabenLabels(listPositionen, guthaben);
+		    		Guthaben guthaben = new Guthaben(betrag, new Date());
+		    		guthaben.fillListPositionen(listPositionen);
+		    		myDB.saveGuthaben(activity, guthaben);
+	    			activity.updateGuthabenLabels(guthaben);
 	    		}
 	    	}else if(HttpStatus.SC_FORBIDDEN==statusCode){
 	    		StringBuilder sb = new StringBuilder("Fehler Benutzername oder Passwort falsch");

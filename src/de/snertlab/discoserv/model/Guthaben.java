@@ -2,31 +2,34 @@ package de.snertlab.discoserv.model;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-
-import de.snertlab.discoserv.Common;
+import java.util.List;
 
 public class Guthaben implements IGuthaben{
 	
-	private static final DateFormat FORMAT_LETZTE_AKTUALISIERUNG = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	public static final DateFormat FORMAT_LETZTE_AKTUALISIERUNG = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-	private double guthaben;
+	private String guthaben;
 	private Date datum;
+	private List<IPosition> listPositionen;
 
-	public Guthaben(double guthaben, Date datum){
+	public Guthaben(String guthaben, Date datum){
+		this.listPositionen = new ArrayList<IPosition>();
 		this.guthaben = guthaben;
 		this.datum = datum;
 	}
 	
-	public Guthaben(double guthaben){
+	public Guthaben(String guthaben){
 		this(guthaben, null);
 	}
 
-	public double getGuthaben() {
+	public String getGuthaben() {
 		return guthaben;
 	}
 
-	public void setGuthaben(double guthaben) {
+	public void setGuthaben(String guthaben) {
 		this.guthaben = guthaben;
 	}
 
@@ -47,8 +50,18 @@ public class Guthaben implements IGuthaben{
 	}
 
 	public String getGuthabenDisplay(){
-		String guthabenEur = Common.formatBetragToDisplay(guthaben);
+		String guthabenEur = guthaben + "Û";
 		return guthabenEur;
+	}
+
+	@Override
+	public List<IPosition> getListPositionenUnmodifiable() {
+		return Collections.unmodifiableList(listPositionen);
+	}
+
+	public void fillListPositionen(List<IPosition> listPositionen) {
+		this.listPositionen.clear();
+		this.listPositionen.addAll(listPositionen);
 	}
 
 	

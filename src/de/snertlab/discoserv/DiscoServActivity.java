@@ -3,9 +3,6 @@ package de.snertlab.discoserv;
 
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -27,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.snertlab.discoserv.model.Guthaben;
 import de.snertlab.discoserv.model.IGuthaben;
-import de.snertlab.discoserv.model.IPosition;
 
 public class DiscoServActivity extends Activity {
 	
@@ -42,7 +38,7 @@ public class DiscoServActivity extends Activity {
 	private String benutzername;
 	private String passwort;
 	private boolean inetConnectionSuccess;
-	private DiscoServSqlOpenHelper myDB; 
+	private DiscoServDataHelper myDB; 
 	
 	
     /** Called when the activity is first created. */
@@ -54,15 +50,15 @@ public class DiscoServActivity extends Activity {
     }
 	
 	private void init(){
-		myDB = new DiscoServSqlOpenHelper(this);
+		myDB = new DiscoServDataHelper();
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         txtViewLetzteAktualisierung = (TextView) findViewById(R.id.txtViewLetzteAktualisierung);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
         listViewPositionen = (ListView) findViewById(R.id.listView1);
         listViewPositionen.setClickable(false);
-		IGuthaben guthaben = myDB.getLastGuthabenFromDb();
+		IGuthaben guthaben = myDB.getLastGuthabenFromDb(this);
 		if(guthaben==null){
-			updateGuthabenLabels(new Guthaben(0));	
+			updateGuthabenLabels(new Guthaben("0"));	
 		}else{
 			updateGuthabenLabels(guthaben);	
 		}
@@ -143,16 +139,14 @@ public class DiscoServActivity extends Activity {
 		    }
 		});
     }
+
     public void updateGuthabenLabels(final IGuthaben guthaben){
-    	updateGuthabenLabels(new ArrayList<IPosition>(), guthaben);
-    }
-    public void updateGuthabenLabels(final List<IPosition> listPositionen, final IGuthaben guthaben){
     	Log.d(LOG_TAG, "updateGuthabenLabels");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
 		    	txtViewGuthaben.setText("Guthaben: " + guthaben.getGuthabenDisplay());
 		    	txtViewLetzteAktualisierung.setText("Letzte Aktualisierung: " + guthaben.getDatumDisplay());
-		    	listViewPositionen.setAdapter(new DiscotelPositionArrayAdapter(listViewPositionen.getContext(), R.layout.rowlayout, listPositionen));
+		    	listViewPositionen.setAdapter(new DiscotelPositionArrayAdapter(listViewPositionen.getContext(), R.layout.rowlayout, guthaben.getListPositionenUnmodifiable()));
 		    }
 		});    	
     }
