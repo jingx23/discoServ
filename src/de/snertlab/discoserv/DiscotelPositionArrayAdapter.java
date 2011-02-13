@@ -34,8 +34,10 @@ public class DiscotelPositionArrayAdapter extends ArrayAdapter<IPosition>{
 		}else{
 			positionView = (LinearLayout) convertView;
 		}
-		TextView txtView = (TextView)positionView.findViewById(R.id.TextView01);
-		txtView.setText(positionObj.getPositionBez() + "\nBrutto: " + positionObj.getBrutto()+"Û");
+		TextView txtView = (TextView)positionView.findViewById(R.id.textView1);
+		TextView txtView2 = (TextView)positionView.findViewById(R.id.textView2);
+		txtView.setText(positionObj.getPositionBez());
+		txtView2.setText(positionObj.getBrutto() +"Û");
 		return positionView;
 	}
 }
