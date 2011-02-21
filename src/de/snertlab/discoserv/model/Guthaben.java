@@ -14,6 +14,8 @@ public class Guthaben implements IGuthaben{
 	private String guthaben;
 	private Date datum;
 	private List<IPosition> listPositionen;
+	private String gebuehrenVom;
+	private String gebuehrenBis;
 
 	public Guthaben(String guthaben, Date datum){
 		this.listPositionen = new ArrayList<IPosition>();
@@ -62,6 +64,22 @@ public class Guthaben implements IGuthaben{
 	public void fillListPositionen(List<IPosition> listPositionen) {
 		this.listPositionen.clear();
 		this.listPositionen.addAll(listPositionen);
+	}
+
+	public String getGebuehrenVom() {
+		return gebuehrenVom;
+	}
+
+	public void setGebuehrenVom(String gebuehrenVom) {
+		this.gebuehrenVom = gebuehrenVom;
+	}
+
+	public String getGebuehrenBis() {
+		return gebuehrenBis;
+	}
+
+	public void setGebuehrenBis(String gebuehrenBis) {
+		this.gebuehrenBis = gebuehrenBis;
 	}
 
 	

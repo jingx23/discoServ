@@ -32,6 +32,7 @@ public class DiscoServActivity extends Activity {
 	
 	private TextView txtViewGuthaben;
 	private TextView txtViewLetzteAktualisierung;
+	private TextView txtViewHeadlineGespraechspreise;
 	private ListView listViewPositionen;
 	private Button btnRequestGuthaben;
 	private RequestGuthabenThread threadRequestBeitrag;
@@ -53,6 +54,7 @@ public class DiscoServActivity extends Activity {
 		myDB = new DiscoServDataHelper();
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         txtViewLetzteAktualisierung = (TextView) findViewById(R.id.txtViewLetzteAktualisierung);
+        txtViewHeadlineGespraechspreise = (TextView) findViewById(R.id.txtViewHeadlineGespraechspreise);
         btnRequestGuthaben = (Button) findViewById(R.id.Button01);
         listViewPositionen = (ListView) findViewById(R.id.listView1);
         listViewPositionen.setClickable(false);
@@ -146,6 +148,12 @@ public class DiscoServActivity extends Activity {
 		    public void run() {
 		    	txtViewGuthaben.setText("Guthaben: " + guthaben.getGuthabenDisplay());
 		    	txtViewLetzteAktualisierung.setText("Letzte Aktualisierung: " + guthaben.getDatumDisplay());
+		    	String textHeadline = "Gesprächspreise (Brutto)";
+		    	if(guthaben.getGebuehrenVom()!=null){
+		    		textHeadline = textHeadline + " vom " + guthaben.getGebuehrenVom() + " bis " + guthaben.getGebuehrenBis();
+		    	}
+		    	textHeadline = textHeadline + ":";
+		    	txtViewHeadlineGespraechspreise.setText(textHeadline);
 		    	listViewPositionen.setAdapter(new DiscotelPositionArrayAdapter(listViewPositionen.getContext(), R.layout.rowlayout, guthaben.getListPositionenUnmodifiable()));
 		    }
 		});    	

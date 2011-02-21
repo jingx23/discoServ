@@ -9,6 +9,8 @@ public interface IGuthaben {
 	Date getDatum();
 	String getDatumDisplay();
 	String getGuthabenDisplay();
+	String getGebuehrenVom();
+	String getGebuehrenBis();
 	List<IPosition> getListPositionenUnmodifiable();
 
 }

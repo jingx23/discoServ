@@ -8,7 +8,7 @@
 <TextView android:layout_width="fill_parent" android:id="@+id/txtViewGuthaben" android:layout_height="wrap_content" android:minHeight="50px" android:gravity="center_vertical"></TextView>
 <Button android:id="@+id/Button01" android:layout_height="wrap_content" android:layout_width="fill_parent" android:text="@string/btnRequestName" android:onClick="@string/btnRequestClickHandler"></Button>
 <TextView android:text="TextView" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/txtViewLetzteAktualisierung"></TextView>
-<TextView android:layout_width="match_parent" android:id="@+id/textView1" android:layout_height="wrap_content" android:text="Gesprächspreise (Brutto):" android:layout_marginTop="25px"></TextView>
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Gesprächspreise (Brutto):" android:layout_marginTop="25px" android:id="@+id/txtViewHeadlineGespraechspreise"></TextView>
 <ListView android:id="@+id/listView1" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingTop="5px"></ListView>
 
 

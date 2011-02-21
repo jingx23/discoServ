@@ -36,6 +36,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	
 	private static final Pattern PATTERN_GUTHABEN   = Pattern.compile("prepaid Guthaben.+?<font[^>]+>(.+?)EUR");
 	private static final Pattern PATTERN_POSITIONEN = Pattern.compile("(?i)<a href=\"#\"[^>]+>(.+?)</a></td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>");
+	private static final Pattern PATTERN_GEBUEHREN_ZEITRAUM = Pattern.compile("<b><u>.+? vom ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4}) bis ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4})</u></b>");
 	
 	private boolean stop;
 	private DiscoServActivity activity;
@@ -80,11 +81,14 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 		    		activity.showToast(view, sb.toString());
 	    		}else{
 		    		String html 	= makeHtmlFromResponse(response);
+		    		//FIXME: 
+		    		//debugSaveHtml(html);
 		    		String betrag 	= findGuthaben(html);
 		    		List<IPosition> listPositionen = parsePositionen(html);
 		    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
 		    		Guthaben guthaben = new Guthaben(betrag, new Date());
 		    		guthaben.fillListPositionen(listPositionen);
+		    		parseGebuehrenVonBis(html, guthaben);
 		    		myDB.saveGuthaben(activity, guthaben);
 	    			activity.updateGuthabenLabels(guthaben);
 	    		}
@@ -161,6 +165,18 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
     	Log.d(DiscoServActivity.LOG_TAG, "parsePositionen end");
     	return listPositionen;
     }
+    
+	private void parseGebuehrenVonBis(String html, Guthaben guthaben) {
+		Log.d(DiscoServActivity.LOG_TAG, "parseGebuehrenVonBis start");
+		Matcher m = PATTERN_GEBUEHREN_ZEITRAUM.matcher(html);
+		if(m.find()){
+			String datumVom = m.group(1);
+			String datumBis = m.group(2);
+			guthaben.setGebuehrenVom(datumVom);
+			guthaben.setGebuehrenBis(datumBis);
+		}
+		Log.d(DiscoServActivity.LOG_TAG, "parsePositionen end");
+	}
     
     @Override
     protected void onPostExecute(Void result) {
