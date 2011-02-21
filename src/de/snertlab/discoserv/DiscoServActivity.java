@@ -29,7 +29,8 @@ public class DiscoServActivity extends Activity {
 	
 	public static final String LOG_TAG = "DiscoServ";
 	private static final String PACKAGE = "de.snertlab.discoserv";
-	
+
+	private TextView txtViewTarif;
 	private TextView txtViewGuthaben;
 	private TextView txtViewLetzteAktualisierung;
 	private TextView txtViewHeadlineGespraechspreise;
@@ -52,6 +53,7 @@ public class DiscoServActivity extends Activity {
 	
 	private void init(){
 		myDB = new DiscoServDataHelper();
+		txtViewTarif	= (TextView) findViewById(R.id.txtViewTarif);
         txtViewGuthaben = (TextView) findViewById(R.id.txtViewGuthaben);
         txtViewLetzteAktualisierung = (TextView) findViewById(R.id.txtViewLetzteAktualisierung);
         txtViewHeadlineGespraechspreise = (TextView) findViewById(R.id.txtViewHeadlineGespraechspreise);
@@ -146,6 +148,7 @@ public class DiscoServActivity extends Activity {
     	Log.d(LOG_TAG, "updateGuthabenLabels");
 		this.runOnUiThread(new Runnable() {
 		    public void run() {
+		    	txtViewTarif.setText("Tarif: " + guthaben.getTarif());
 		    	txtViewGuthaben.setText("Guthaben: " + guthaben.getGuthabenDisplay());
 		    	txtViewLetzteAktualisierung.setText("Letzte Aktualisierung: " + guthaben.getDatumDisplay());
 		    	String textHeadline = "Gesprächspreise (Brutto)";

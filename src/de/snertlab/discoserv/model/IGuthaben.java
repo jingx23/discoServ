@@ -11,6 +11,7 @@ public interface IGuthaben {
 	String getGuthabenDisplay();
 	String getGebuehrenVom();
 	String getGebuehrenBis();
+	String getTarif();
 	List<IPosition> getListPositionenUnmodifiable();
 
 }

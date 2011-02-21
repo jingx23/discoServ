@@ -37,6 +37,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	private static final Pattern PATTERN_GUTHABEN   = Pattern.compile("prepaid Guthaben.+?<font[^>]+>(.+?)EUR");
 	private static final Pattern PATTERN_POSITIONEN = Pattern.compile("(?i)<a href=\"#\"[^>]+>(.+?)</a></td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>");
 	private static final Pattern PATTERN_GEBUEHREN_ZEITRAUM = Pattern.compile("<b><u>.+? vom ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4}) bis ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4})</u></b>");
+	private static final Pattern PATTERN_TARIF 				= Pattern.compile("<b>Tarif:</b><br>(.+?)</td>");
 	
 	private boolean stop;
 	private DiscoServActivity activity;
@@ -81,12 +82,12 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 		    		activity.showToast(view, sb.toString());
 	    		}else{
 		    		String html 	= makeHtmlFromResponse(response);
-		    		//FIXME: 
-		    		//debugSaveHtml(html);
 		    		String betrag 	= findGuthaben(html);
+		    		String tarif	= findTarif(html);
 		    		List<IPosition> listPositionen = parsePositionen(html);
 		    		if(betrag==null) throw new RuntimeException("Betrag konnte nicht ermittelt werden");
 		    		Guthaben guthaben = new Guthaben(betrag, new Date());
+		    		guthaben.setTarif(tarif);
 		    		guthaben.fillListPositionen(listPositionen);
 		    		parseGebuehrenVonBis(html, guthaben);
 		    		myDB.saveGuthaben(activity, guthaben);
@@ -176,6 +177,18 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 			guthaben.setGebuehrenBis(datumBis);
 		}
 		Log.d(DiscoServActivity.LOG_TAG, "parsePositionen end");
+	}
+	
+	private String findTarif(String html){
+		Log.d(DiscoServActivity.LOG_TAG, "findTarif start");
+		String tarif = "";
+		Matcher m = PATTERN_TARIF.matcher(html);
+		if(m.find()){
+			tarif = m.group(1);
+			tarif = tarif.trim();
+		}
+		Log.d(DiscoServActivity.LOG_TAG, "findTarif end");
+		return tarif;
 	}
     
     @Override

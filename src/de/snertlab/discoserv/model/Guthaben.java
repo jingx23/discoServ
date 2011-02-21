@@ -16,6 +16,7 @@ public class Guthaben implements IGuthaben{
 	private List<IPosition> listPositionen;
 	private String gebuehrenVom;
 	private String gebuehrenBis;
+	private String tarif;
 
 	public Guthaben(String guthaben, Date datum){
 		this.listPositionen = new ArrayList<IPosition>();
@@ -82,5 +83,11 @@ public class Guthaben implements IGuthaben{
 		this.gebuehrenBis = gebuehrenBis;
 	}
 
+	public String getTarif(){
+		return tarif;
+	}
 	
+	public void setTarif(String tarif){
+		this.tarif = tarif;
+	}
 }

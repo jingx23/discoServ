@@ -35,14 +35,16 @@ public class DiscoServDataHelper {
 				if(lineCount==0){
 					//Version
 				}else if(lineCount==1){
-					guthaben.setGuthaben(line);
+					guthaben.setTarif(line);
 				}else if(lineCount==2){
-					guthaben.setDatum(Guthaben.FORMAT_LETZTE_AKTUALISIERUNG.parse(line));
+					guthaben.setGuthaben(line);
 				}else if(lineCount==3){
-					guthaben.setGebuehrenVom(line);
+					guthaben.setDatum(Guthaben.FORMAT_LETZTE_AKTUALISIERUNG.parse(line));
 				}else if(lineCount==4){
+					guthaben.setGebuehrenVom(line);
+				}else if(lineCount==5){
 					guthaben.setGebuehrenBis(line);
-				}else if(lineCount > 4){
+				}else if(lineCount > 5){
 					String[] posFields = line.split(";");
 					Position pos = new Position();
 					for (int i = 0; i < posFields.length; i++) {
@@ -81,6 +83,7 @@ public class DiscoServDataHelper {
 			FileOutputStream fOut = activity.openFileOutput(DATA_FILE, Activity.MODE_PRIVATE);
 			BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fOut));
 			buf.write(DATA_FORMAT_PREFIX + DATA_FORMAT_VERSION+ "\n");
+			buf.write(guthaben.getTarif() + "\n");
 			buf.write(guthaben.getGuthaben() + "\n");
 			buf.write(Guthaben.FORMAT_LETZTE_AKTUALISIERUNG.format(guthaben.getDatum())+ "\n");
 			buf.write(guthaben.getGebuehrenVom() + "\n");
@@ -150,14 +153,13 @@ public class DiscoServDataHelper {
 					}
 				}
 				listPositionen.add(pos);
-			}else if(lineCount > 1){
-				
 			}else{
 				throw new RuntimeException("Undefined line count: " + lineCount);
 			}
 			lineCount++;
 		}
 		buf.close();
+		guthaben.setTarif("-");
 		guthaben.setGebuehrenVom("-");
 		guthaben.setGebuehrenBis("-");
 		guthaben.fillListPositionen(listPositionen);
