@@ -14,7 +14,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -62,7 +67,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 			HttpParams httpParams = new BasicHttpParams();
 			HttpConnectionParams.setConnectionTimeout(httpParams, CON_TIMEOUT);
 			HttpConnectionParams.setSoTimeout(httpParams, SOCKET_TIMEOUT);
-			httpclient = new DefaultHttpClient(httpParams);
+			httpclient = new MyHttpClient(httpParams);
 			Log.d(DiscoServActivity.LOG_TAG, "requestBetrag thread startet");
 	    	List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 	    	HttpPost httpost = new HttpPost("https://service.discoplus.de/frei/LOGIN");
@@ -207,4 +212,22 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
     	super.onCancelled();
     }
 
+	public class MyHttpClient extends DefaultHttpClient {
+		public MyHttpClient(HttpParams httpParams){
+			super(httpParams);
+		}
+		
+		@Override
+		protected ClientConnectionManager createClientConnectionManager() {
+			try{
+				SchemeRegistry registry = new SchemeRegistry();
+				registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+				registry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
+				return new SingleClientConnManager(getParams(), registry);
+			}catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
 }
