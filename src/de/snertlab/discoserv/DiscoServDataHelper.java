@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import de.snertlab.discoserv.model.Guthaben;
 import de.snertlab.discoserv.model.IGuthaben;
@@ -22,7 +23,7 @@ public class DiscoServDataHelper {
 	private static final int DATA_FORMAT_VERSION	= 1;
 	private static final String DATA_FILE = "data.txt";
 
-	public IGuthaben getLastGuthabenFromDb(DiscoServActivity activity) {
+	public IGuthaben getLastGuthabenFromDb(Context activity) {
 		try{
 			patchDataFileFromVersion_1_2_0(activity);
 			if( ! checkDataFileExist(activity)) return null;
@@ -78,7 +79,7 @@ public class DiscoServDataHelper {
 		}
 	}
 
-	public void saveGuthaben(DiscoServActivity activity, IGuthaben guthaben){
+	public void saveGuthaben(Context activity, IGuthaben guthaben){
 		try{
 			FileOutputStream fOut = activity.openFileOutput(DATA_FILE, Activity.MODE_PRIVATE);
 			BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fOut));
@@ -103,7 +104,7 @@ public class DiscoServDataHelper {
 		}
 	}
 	
-	private boolean checkDataFileExist(DiscoServActivity activity){
+	private boolean checkDataFileExist(Context activity){
 		String[] files = activity.fileList();
 		for (String filename : files) {
 			if(filename.equals(DATA_FILE)){
@@ -113,7 +114,7 @@ public class DiscoServDataHelper {
 		return false;
 	}
 	
-	private void patchDataFileFromVersion_1_2_0(DiscoServActivity activity) throws IOException, ParseException{
+	private void patchDataFileFromVersion_1_2_0(Context activity) throws IOException, ParseException{
 		if( ! checkDataFileExist(activity)) return;
 		BufferedReader buf = new BufferedReader( new InputStreamReader(activity.openFileInput(DATA_FILE)));
 		String version = buf.readLine();
