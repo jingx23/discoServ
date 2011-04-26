@@ -81,6 +81,7 @@ public class DiscoServDataHelper {
 
 	public void saveGuthaben(Context activity, IGuthaben guthaben){
 		try{
+			activity.deleteFile(DATA_FILE);
 			FileOutputStream fOut = activity.openFileOutput(DATA_FILE, Activity.MODE_PRIVATE);
 			BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fOut));
 			buf.write(DATA_FORMAT_PREFIX + DATA_FORMAT_VERSION+ "\n");
