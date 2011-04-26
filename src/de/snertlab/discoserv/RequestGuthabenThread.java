@@ -1,8 +1,13 @@
 package de.snertlab.discoserv;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -26,6 +31,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -43,6 +49,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	private static final Pattern PATTERN_POSITIONEN = Pattern.compile("(?i)<a href=\"#\"[^>]+>(.+?)</a></td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>");
 	private static final Pattern PATTERN_GEBUEHREN_ZEITRAUM = Pattern.compile("<b><u>.+? vom ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4}) bis ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4})</u></b>");
 	private static final Pattern PATTERN_TARIF 				= Pattern.compile("<b>Tarif:</b><br>(.+?)</td>");
+	private static final SimpleDateFormat SDFCURRMONTHYEAR  = new SimpleDateFormat("MMyy");
 	
 	private boolean stop;
 	private DiscoServActivity activity;
@@ -160,7 +167,15 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
     	Log.d(DiscoServActivity.LOG_TAG, "parsePositionen start");
     	List<IPosition> listPositionen = new ArrayList<IPosition>();
     	Matcher m = PATTERN_POSITIONEN.matcher(html);
+    	Calendar cal = Calendar.getInstance();
+    	cal.add(Calendar.MONTH, 1);
+    	String currMonthYear = SDFCURRMONTHYEAR.format(cal.getTime());
     	while(m.find()){
+    		String completeString = m.group(0).trim();
+    		int indexOfTable = completeString.indexOf("&Table=");
+    		int indexOfInvertedComma = completeString.indexOf("'", indexOfTable);
+    		String sDate = completeString.substring(indexOfInvertedComma-4, indexOfInvertedComma);
+    		if( ! currMonthYear.equals(sDate) ) continue;
     		Position pos = new Position();
     		pos.setPositionBez(m.group(1).trim());
     		pos.setNetto(m.group(3).trim());
