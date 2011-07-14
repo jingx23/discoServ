@@ -46,7 +46,6 @@ public class SettingsPreferencesActivity extends PreferenceActivity {
 	
 	private void initOnSharedPreferenceChangeListener(){
 		onSharedPreferenceChangeListenerAddSummeryText = new OnSharedPreferenceChangeListener() {
-			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				 if (KEY_USERNAME.equals(key)) {
 					 mUsernamePreference.setSummary(getPreferenceScreen().getSharedPreferences().getString(KEY_USERNAME, ""));

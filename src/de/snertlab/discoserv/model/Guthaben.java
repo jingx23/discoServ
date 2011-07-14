@@ -57,7 +57,6 @@ public class Guthaben implements IGuthaben{
 		return guthabenEur;
 	}
 
-	@Override
 	public List<IPosition> getListPositionenUnmodifiable() {
 		return Collections.unmodifiableList(listPositionen);
 	}
