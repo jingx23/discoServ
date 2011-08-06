@@ -41,7 +41,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
 	private static final int CON_TIMEOUT 	= (60 * 1000);
 	private static final int SOCKET_TIMEOUT = (60 * 1000);
 	
-	private static final Pattern PATTERN_GUTHABEN   = Pattern.compile("prepaid Guthaben.+?<font[^>]+>(.+?)EUR");
+	private static final Pattern PATTERN_GUTHABEN   = Pattern.compile("prepaid Guthaben.+?<font[^>]+>(.+?)</a>");
 	private static final Pattern PATTERN_POSITIONEN = Pattern.compile("(?i)<a href=\"#\"[^>]+>(.+?)</a></td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>(.+?)<td class=vcell[^>]+>(.+?)</td>");
 	private static final Pattern PATTERN_GEBUEHREN_ZEITRAUM = Pattern.compile("<b><u>.+? vom ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4}) bis ([0-9]{1,2}.[0-9]{1,2}.[0-9]{4})</u></b>");
 	private static final Pattern PATTERN_TARIF 				= Pattern.compile("<b>Tarif:</b><br>(.+?)</td>");
@@ -154,6 +154,7 @@ public class RequestGuthabenThread extends AsyncTask<Void, Void, Void>{
     	if(m.find()){
     		betrag = m.group(1);
     		betrag = betrag.trim();
+    		betrag = betrag.replace(".", ",");
     	}
     	Log.d(DiscoServActivity.LOG_TAG, "findGuthaben end");
     	return betrag;
