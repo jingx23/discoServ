@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Master" x="176" measuredWidth="396" measuredHeight="790">
+    <screen xsi:type="model:WidgetGroup" href="../assets/NexusOne.screen#Phone"/>
+  </widgets>
+  <widgets xsi:type="model:WidgetGroup" x="216" y="144" measuredWidth="91" measuredHeight="45">
+    <widgets xsi:type="model:Label" text="Tarif:" measuredWidth="32" measuredHeight="23">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="31" text="discoPlus" measuredWidth="55" measuredHeight="23">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" y="22" text="Guthaben:" measuredWidth="60" measuredHeight="23">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="59" y="22" text="3,34€" measuredWidth="32" measuredHeight="23">
+      <font/>
+    </widgets>
+  </widgets>
+  <widgets xsi:type="model:Button" x="216" y="208" width="316" text="Guthaben abfragen" measuredWidth="316" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" x="216" y="240" text="Letzte Aktualisierung: 08.08.2011 10:00:00" measuredWidth="220" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Text" x="216" y="280" width="300" height="33" text="Gesprächspreise (Brutto) vom 01.08.2011 bis&#xD;&#xA;08.08.2011:&#xD;&#xA;" measuredWidth="300" measuredHeight="33" dummyText="true">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Table" x="216" y="312" width="316" text="SMS zu Eplus, >.-0\,08€&#xD;&#xA;Verbindungen zu Vodafone, -0\,08€&#xD;&#xA;GPRS-Verbindungen,  0\,00€" measuredWidth="316" measuredHeight="67" selection="" horizontalLines="true" alternative="#eeeeee" verticalLines="false" header="false">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Rectangle" x="214" y="116" width="320" height="20" text="discoServ vX.X.X" measuredWidth="320" measuredHeight="20" background="#999999" border="none" textAlignment="Left">
+    <font size="9" bold="true"/>
+  </widgets>
+  <widgets xsi:type="model:WidgetGroup" x="214" y="557" measuredWidth="320" measuredHeight="68" name="Menu Single Row">
+    <widgets xsi:type="model:WidgetGroup" measuredWidth="320" measuredHeight="68">
+      <widgets xsi:type="model:Panel" width="320" height="68" measuredWidth="320" measuredHeight="68" border="none"/>
+      <widgets xsi:type="model:VLine" x="160" height="68" measuredWidth="6" measuredHeight="68"/>
+    </widgets>
+    <widgets xsi:type="model:Label" x="32" y="5" width="91" text="Einstellungen" measuredWidth="91" measuredHeight="58" textAlignment="Center" icon="options (large)" iconPosition="top">
+      <font/>
+    </widgets>
+    <widgets xsi:type="model:Button" x="216" y="21" text="Beenden" measuredWidth="66" measuredHeight="25">
+      <font/>
+    </widgets>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font/>
+</model:Screen>
